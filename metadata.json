@@ -1,0 +1,8 @@
+{
+  "name": "InvestSim EGP",
+  "description": "3D Clicker Game with custom config and admin panel",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
