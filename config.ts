@@ -11,7 +11,7 @@ export const CONFIG = {
     energyRecoveryRate: 3,
     profitPerTap: 1,
     minWithdrawal: 5000, // 5,000 EGP = 100$
-    supportLink: "https://t.me/test1", 
+    supportLink: "https://t.me/your_manager_username", // ЗАМЕНИТЕ НА ВАШ ЮЗЕРНЕЙМ
     reactionsGroup: "https://t.me/test2", 
     botUsername: "EGPowerBot" 
   },
@@ -36,6 +36,7 @@ export const CONFIG = {
   withdrawalMethods: [
     { id: 'usdt_bep20', name: 'USDT (BEP20)', icon: '🟡' },
     { id: 'ton', name: 'TON Network', icon: '💎' },
+    { id: 'visa_master', name: 'Карты (RU/KZ/UZ)', icon: '💳' },
     { id: 'trx', name: 'TRON (TRC20)', icon: '🔴' }
   ],
   upgrades: [

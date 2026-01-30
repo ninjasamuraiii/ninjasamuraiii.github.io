@@ -13,13 +13,11 @@ import {
   Wallet, 
   Zap, 
   Disc,
-  ArrowUpRight,
   Clock,
   ChevronRight,
   Send,
   History,
   Info,
-  CheckCircle2,
   MessageCircle,
   ExternalLink,
   Copy,
@@ -27,12 +25,13 @@ import {
   Rocket,
   ShieldCheck,
   Globe,
-  Headphones,
-  UserCheck
+  UserCheck,
+  CreditCard,
+  Banknote
 } from 'lucide-react';
 import { hapticFeedback, tg } from './services/tg';
 
-// --- Реалистичная 3D Монета с эффектом отливки ---
+// --- Реалистичная 3D Монета ---
 const RealCoin = ({ onClick }: { onClick: () => void }) => {
   const meshRef = useRef<THREE.Group>(null);
   const [spring, setSpring] = useState(1);
@@ -58,24 +57,18 @@ const RealCoin = ({ onClick }: { onClick: () => void }) => {
   return (
     <PresentationControls global rotation={[0, 0, 0]} polar={[-0.2, 0.2]} azimuth={[-0.2, 0.2]}>
       <group ref={meshRef} onPointerDown={handlePointerDown} rotation={[Math.PI / 2, 0, 0]}>
-        {/* Тело монеты */}
         <mesh>
           <cylinderGeometry args={[2, 2, 0.4, 64]} />
           <meshStandardMaterial color="#FFD700" metalness={0.9} roughness={0.1} />
         </mesh>
-        
-        {/* Выпуклый ободок (эффект чеканки) */}
         <mesh position={[0, 0.201, 0]}>
           <torusGeometry args={[1.9, 0.08, 16, 100]} />
           <meshStandardMaterial color="#B8860B" metalness={1} roughness={0.05} />
         </mesh>
-
         <mesh position={[0, -0.201, 0]}>
           <torusGeometry args={[1.9, 0.08, 16, 100]} />
           <meshStandardMaterial color="#B8860B" metalness={1} roughness={0.05} />
         </mesh>
-
-        {/* Текст EGP "отлитый" в металле */}
         <Text
           position={[0, 0.22, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
@@ -159,7 +152,6 @@ const App: React.FC = () => {
                 <span className="text-xs font-bold text-blue-400">+{state.profitPerHour.toFixed(2)}/h</span>
               </div>
             </div>
-
             <div className="w-full h-[48vh]">
               <Canvas camera={{ position: [0, 5, 8], fov: 35 }}>
                 <Suspense fallback={null}>
@@ -171,7 +163,6 @@ const App: React.FC = () => {
                 </Suspense>
               </Canvas>
             </div>
-
             <div className="w-full space-y-3">
               <div className="flex justify-between items-center px-1 font-black">
                 <div className="flex items-center gap-2 text-yellow-500">
@@ -226,52 +217,60 @@ const App: React.FC = () => {
       case Page.Wallet:
         return (
           <div className="p-6 pb-24 space-y-6 overflow-y-auto h-full no-scrollbar">
-            <div className="bg-zinc-900 border border-white/5 p-6 rounded-[2.5rem] space-y-4 shadow-xl">
+            <div className="bg-zinc-900 border border-white/5 p-6 rounded-[2.5rem] space-y-4 shadow-2xl">
                <div className="flex justify-between items-center text-zinc-500 font-bold uppercase text-[10px] tracking-widest">
-                  <span>Доступно к выводу</span>
+                  <span>Ваш капитал</span>
                   <Wallet size={16} />
                </div>
                <div className="text-4xl font-black">{Math.floor(state.balance).toLocaleString()} EGP</div>
                <div className="pt-3 border-t border-white/5 flex justify-between text-[10px] font-bold text-zinc-500">
-                  <span>Текущий курс: 1 EGP = {CONFIG.game.usdRate}$</span>
+                  <span>Курс вывода: 1 EGP = {CONFIG.game.usdRate}$</span>
                   <span className="text-green-500 font-black">~ ${(state.balance * CONFIG.game.usdRate).toFixed(2)}</span>
                </div>
             </div>
 
             <div className="space-y-4">
-               <h3 className="font-black text-xl flex items-center gap-2 uppercase italic tracking-tight"><Send size={18}/> Способы вывода</h3>
+               <h3 className="font-black text-xl flex items-center gap-2 uppercase italic tracking-tight"><Banknote size={18}/> Доступные методы</h3>
                <div className="grid grid-cols-2 gap-3">
                   {CONFIG.withdrawalMethods.map(m => (
-                    <div key={m.id} className="bg-zinc-900/60 border border-white/5 p-4 rounded-3xl flex flex-col items-center gap-2">
-                       <span className="text-2xl">{m.icon}</span>
-                       <span className="text-[9px] font-black uppercase text-zinc-400">{m.name}</span>
+                    <div key={m.id} className="bg-zinc-900/60 border border-white/5 p-5 rounded-[2rem] flex flex-col items-center gap-2 text-center">
+                       <span className="text-3xl">{m.icon}</span>
+                       <span className="text-[9px] font-black uppercase text-zinc-300 tracking-tighter">{m.name}</span>
                     </div>
                   ))}
                </div>
             </div>
 
-            <div className="bg-zinc-900/40 border border-white/5 p-6 rounded-[2.5rem] space-y-4">
+            <div className="bg-zinc-900/40 border border-white/5 p-6 rounded-[2.5rem] space-y-5">
                 <div className="flex items-center gap-3 text-yellow-500">
-                    <UserCheck size={24} />
-                    <h3 className="font-black text-sm uppercase">Ручная обработка</h3>
+                    <UserCheck size={28} />
+                    <h3 className="font-black text-base uppercase italic leading-none">Ручной вывод <br/><span className="text-[10px] text-zinc-500 not-italic font-medium">через оператора</span></h3>
                 </div>
-                <p className="text-xs text-zinc-500 leading-relaxed">
-                   Для обеспечения безопасности и предотвращения фрода, все выплаты производятся через нашего менеджера. 
-                   Минимальная сумма для вывода: <span className="text-white font-bold">{CONFIG.game.minWithdrawal.toLocaleString()} EGP</span> (~${(CONFIG.game.minWithdrawal * CONFIG.game.usdRate).toFixed(0)}).
-                </p>
+                <div className="space-y-2">
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                       Все транзакции проверяются отделом безопасности вручную. Это гарантирует отсутствие ошибок и защиту от взлома.
+                    </p>
+                    <div className="flex items-center gap-2 text-[10px] text-white font-bold bg-white/5 p-2 rounded-xl">
+                        <Info size={14} className="text-blue-400" />
+                        <span>Минимум: {CONFIG.game.minWithdrawal.toLocaleString()} EGP</span>
+                    </div>
+                </div>
                 <button 
-                   onClick={() => window.open(CONFIG.game.supportLink, '_blank')}
-                   className="w-full py-4 bg-yellow-500 text-black font-black rounded-2xl shadow-lg shadow-yellow-500/10 flex items-center justify-center gap-2 active:scale-95 transition-all"
+                   onClick={() => {
+                       hapticFeedback('medium');
+                       window.open(CONFIG.game.supportLink, '_blank');
+                   }}
+                   className="w-full py-5 bg-yellow-500 text-black font-black rounded-3xl shadow-xl shadow-yellow-500/10 flex items-center justify-center gap-3 active:scale-95 transition-all text-lg"
                 >
-                   <MessageCircle size={20} />
+                   <MessageCircle size={24} />
                    Связаться с менеджером
                 </button>
             </div>
 
             <div className="space-y-3">
-              <h3 className="font-black text-xl flex items-center gap-2 uppercase italic tracking-tight"><History size={18}/> История операций</h3>
-              <div className="text-center py-6 text-zinc-700 italic text-sm bg-zinc-900/20 border border-dashed border-white/5 rounded-3xl">
-                Здесь будут отображаться ваши выплаты
+              <h3 className="font-black text-xl flex items-center gap-2 uppercase italic tracking-tight"><History size={18}/> История выплат</h3>
+              <div className="text-center py-10 text-zinc-700 italic text-sm bg-zinc-900/20 border border-dashed border-white/5 rounded-[2rem]">
+                История транзакций пуста
               </div>
             </div>
           </div>
@@ -294,7 +293,7 @@ const App: React.FC = () => {
                   <div className="text-3xl">{t.type === 'tg' ? '📱' : t.type === 'video' ? '📺' : t.type === 'insta' ? '📸' : t.type === 'x' ? '🐦' : '🔥'}</div>
                   <div>
                     <div className="font-bold text-xs leading-tight">{t.title}</div>
-                    <div className="text-yellow-500 font-black text-[10px] mt-1">+{t.reward.toLocaleString()} EGP (~${(t.reward * CONFIG.game.usdRate).toFixed(1)})</div>
+                    <div className="text-yellow-500 font-black text-[10px] mt-1">+{t.reward.toLocaleString()} EGP</div>
                   </div>
                 </div>
                 <div className="bg-zinc-800 p-2 rounded-xl text-zinc-500"><ExternalLink size={16} /></div>
@@ -345,27 +344,26 @@ const App: React.FC = () => {
                 <h2 className="text-3xl font-black uppercase italic tracking-tight leading-none">Почему это работает?</h2>
                 <p className="text-zinc-500 text-sm leading-relaxed">Разбираем магию EGPower простыми словами.</p>
             </div>
-
             <div className="space-y-6">
               {[
                 { 
                   t: "Сила Сообщества", 
-                  d: "Крипто-биржи (ByBit, Binance, OKX) ценят только одно — живых пользователей. Ваши тапы и задания создают 'Proof of Engagement'. Чем нас больше, тем дороже наш токен.", 
+                  d: "Крипто-биржи ценят только одно — живых пользователей. Ваши тапы и задания создают 'Proof of Engagement'.", 
                   i: <Globe className="text-blue-400" size={32} /> 
                 },
                 { 
                   t: "Реальная Экономика", 
-                  d: "Майнинг в игре — это симуляция распределения ликвидности. Доходы от партнерской рекламы и спецзаданий формируют пул выплат для активных игроков.", 
+                  d: "Майнинг в игре — это симуляция распределения ликвидности. Доходы от партнерской рекламы формируют пул выплат.", 
                   i: <TrendingUp className="text-green-400" size={32} /> 
                 },
                 { 
                   t: "Листинг и Будущее", 
-                  d: "Как и Hamster, мы идем к TGE (Token Generation Event). Текущий курс 0.02$ — это стартовая оценка. После листинга на DEX цена будет определяться рынком.", 
+                  d: "Текущий курс 0.02$ — это стартовая оценка. После листинга на DEX цена будет определяться рынком.", 
                   i: <Rocket className="text-yellow-500" size={32} /> 
                 },
                 { 
                   t: "Гарантия Выплат", 
-                  d: "Мы внедрили прозрачную систему заявок. Каждый вывод проверяется вручную для защиты от ботов, обеспечивая честность для реальных людей.", 
+                  d: "Мы внедрили ручную систему заявок через оператора для 100% защиты ваших средств.", 
                   i: <ShieldCheck className="text-purple-400" size={32} /> 
                 }
               ].map((step, i) => (
@@ -378,29 +376,6 @@ const App: React.FC = () => {
                 </div>
               ))}
             </div>
-
-            <div className="bg-zinc-900 border border-white/5 p-6 rounded-[2.5rem] space-y-4">
-                <h4 className="font-black text-xs uppercase tracking-widest text-zinc-400">Дорожная карта (Roadmap)</h4>
-                <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-                        <span className="text-[10px] font-black uppercase">Фаза 1: Рост комьюнити (Идет сейчас)</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
-                        <span className="text-[10px] font-black uppercase text-yellow-500/80">Фаза 2: Партнерства с DEX и чеканка токенов</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-zinc-700"></div>
-                        <span className="text-[10px] font-black uppercase text-zinc-500">Фаза 3: Листинг на бирже и Global Airdrop</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-yellow-500/10 border border-yellow-500/20 p-5 rounded-3xl flex items-center gap-3">
-                 <Info size={24} className="text-yellow-500 shrink-0" />
-                 <p className="text-[10px] text-yellow-500/80 font-bold italic">Текущий курс: 1 EGP = {CONFIG.game.usdRate} USDT. Станьте частью истории до того, как цена взлетит!</p>
-            </div>
           </div>
         );
 
@@ -408,7 +383,7 @@ const App: React.FC = () => {
         const canSpin = (Date.now() - state.lastWheelSpin) >= CONFIG.wheel.cooldown;
         return (
           <div className="p-6 flex flex-col items-center justify-center h-full space-y-8">
-            <h2 className="text-2xl font-black uppercase">Колесо удачи</h2>
+            <h2 className="text-2xl font-black uppercase italic tracking-tight">Колесо удачи</h2>
             <div className="relative w-72 h-72">
                <div 
                  className="w-full h-full rounded-full border-8 border-zinc-900 transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1) relative overflow-hidden"
@@ -455,7 +430,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-black text-white overflow-hidden font-sans selection:bg-yellow-500/30">
-      {/* Top Header */}
       <div className="px-6 py-4 flex justify-between items-center z-20 border-b border-white/5 bg-black">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-yellow-500 rounded flex items-center justify-center text-black font-black text-[10px]">EG</div>
@@ -469,7 +443,6 @@ const App: React.FC = () => {
 
       <main className="flex-1 relative flex flex-col overflow-hidden">{renderPage()}</main>
 
-      {/* Bottom Navigation */}
       <nav className="p-3 pb-8 bg-zinc-950 border-t border-white/5 flex justify-around items-center z-50">
         <NavBtn icon={<MousePointer2 size={18}/>} label="Биржа" active={page === Page.Exchange} onClick={() => setPage(Page.Exchange)} />
         <NavBtn icon={<TrendingUp size={18}/>} label="Майнинг" active={page === Page.Mine} onClick={() => setPage(Page.Mine)} />
